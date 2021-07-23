@@ -1,0 +1,6 @@
+_extends: gh-config
+
+repository:
+  description: Utility functions for network related operation.
+  homepage: https://blog.openacid.com
+  topics: python, net
