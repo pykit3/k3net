@@ -14,7 +14,7 @@ setuptools.setup(
     keywords=['python', 'net'],
     python_requires='>=3.0',
 
-    install_requires=['k3ut>=0.1.15,<0.2', 'netifaces~=0.11.0', 'PyYAML>=5.0.0'],
+    install_requires=['k3ut<0.2,>=0.1.15', 'netifaces~=0.11.0', 'PyYAML>=5.0.0'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
