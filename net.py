@@ -10,15 +10,15 @@ import yaml
 """
 It is string "PUB" that represents a public ip.
 """
-PUB = 'PUB'
+PUB = "PUB"
 
 """
 It is string "INN" that represents a internal ip.
 """
-INN = 'INN'
+INN = "INN"
 
-LOCALHOST = '127.0.0.1'
-inner_ip_patterns = ['^172[.]1[6-9].*', '^172[.]2[0-9].*', '^172[.]3[0-1].*', '^10[.].*', '^192[.]168[.].*']
+LOCALHOST = "127.0.0.1"
+inner_ip_patterns = ["^172[.]1[6-9].*", "^172[.]2[0-9].*", "^172[.]3[0-1].*", "^10[.].*", "^192[.]168[.].*"]
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +26,7 @@ class NetworkError(Exception):
     """
     Super class of all network exceptions.
     """
+
     pass
 
 
@@ -33,6 +34,7 @@ class IPUnreachable(NetworkError):
     """
     Exception for an unreachable ip.
     """
+
     pass
 
 
@@ -40,6 +42,7 @@ class InvalidIP4(Exception):
     """
     Exception for an invalidIP4 ip.
     """
+
     pass
 
 
@@ -47,6 +50,7 @@ class InvalidIP4Number(Exception):
     """
     Exception for an invalidIP4 number.
     """
+
     pass
 
 
@@ -59,10 +63,9 @@ def is_ip4(ip):
     if not isinstance(ip, (str, bytes)):
         return False
 
-    ip = ip.split('.')
+    ip = ip.split(".")
 
     for s in ip:
-
         if not s.isdigit():
             return False
 
@@ -79,11 +82,10 @@ def ip_class(ip):
     :param ip:
     :return: `net.PUB` or `net.INN`.
     """
-    if ip.startswith('127.0.0.'):
+    if ip.startswith("127.0.0."):
         return INN
 
     for ptn in inner_ip_patterns:
-
         if re.match(ptn, ip):
             return INN
 
@@ -92,7 +94,7 @@ def ip_class(ip):
 
 
 def is_ip4_loopback(ip):
-    return is_ip4(ip) and ip.startswith('127.')
+    return is_ip4(ip) and ip.startswith("127.")
 
 
 def ips_prefer(ips, preference):
@@ -154,7 +156,7 @@ def choose_ips(ips, ip_type=None):
     elif ip_type == PUB:
         return choose_pub(ips)
     else:
-        raise ValueError('invalid ip_type: {ip_type}'.format(ip_type=ip_type))
+        raise ValueError("invalid ip_type: {ip_type}".format(ip_type=ip_type))
 
 
 def choose_pub(ips):
@@ -191,7 +193,7 @@ def get_host_ip4(iface_prefix=None, exclude_prefix=None):
     :return: a list of ipv4 addresses.
     """
     if iface_prefix is None:
-        iface_prefix = ['']
+        iface_prefix = [""]
 
     if isinstance(iface_prefix, (str, bytes)):
         iface_prefix = [iface_prefix]
@@ -203,7 +205,6 @@ def get_host_ip4(iface_prefix=None, exclude_prefix=None):
     ips = []
 
     for ifacename in netifaces.interfaces():
-
         matched = False
 
         for t in iface_prefix:
@@ -223,10 +224,8 @@ def get_host_ip4(iface_prefix=None, exclude_prefix=None):
         addrs = netifaces.ifaddresses(ifacename)
 
         if netifaces.AF_INET in addrs and netifaces.AF_LINK in addrs:
-
             for addr in addrs[netifaces.AF_INET]:
-
-                ip = str(addr['addr'])
+                ip = str(addr["addr"])
 
                 if not is_ip4_loopback(ip):
                     ips.append(ip)
@@ -250,47 +249,44 @@ def choose_by_idc(dest_idc, local_idc, ips):
     return pref_ips
 
 
-def get_host_devices(iface_prefix=''):
+def get_host_devices(iface_prefix=""):
     """
-    Returns a dictionary of all iface, and address information those are binded to it.
+        Returns a dictionary of all iface, and address information those are binded to it.
 
-{
-    'en0': {
-        'LINK': [{
-            'addr': 'ac:bc:32:8f:e5:71'
-    }],
-        'INET': [{
-            'broadcast': '172.18.5.255',
-            'netmask': '255.255.255.0',
-            'addr': '172.18.5.252'
+    {
+        'en0': {
+            'LINK': [{
+                'addr': 'ac:bc:32:8f:e5:71'
+        }],
+            'INET': [{
+                'broadcast': '172.18.5.255',
+                'netmask': '255.255.255.0',
+                'addr': '172.18.5.252'
 
-        }]
+            }]
+
+        }
 
     }
-
-}
-    :param iface_prefix: is a string or `''` to specify what iface should be chosen.
-    :return: a dictionary of iface and its address information.
+        :param iface_prefix: is a string or `''` to specify what iface should be chosen.
+        :return: a dictionary of iface and its address information.
     """
     rst = {}
 
     for ifacename in netifaces.interfaces():
-
         if not ifacename.startswith(iface_prefix):
             continue
 
         addrs = netifaces.ifaddresses(ifacename)
 
         if netifaces.AF_INET in addrs and netifaces.AF_LINK in addrs:
-
-            ips = [addr['addr'] for addr in addrs[netifaces.AF_INET]]
+            ips = [addr["addr"] for addr in addrs[netifaces.AF_INET]]
 
             for ip in ips:
                 if is_ip4_loopback(ip):
                     break
             else:
-                rst[ifacename] = {'INET': addrs[netifaces.AF_INET],
-                                  'LINK': addrs[netifaces.AF_LINK]}
+                rst[ifacename] = {"INET": addrs[netifaces.AF_INET], "LINK": addrs[netifaces.AF_LINK]}
 
     return rst
 
@@ -309,17 +305,17 @@ def parse_ip_regex_str(ip_regexs_str):
     """
     ip_regexs_str = ip_regexs_str.strip()
 
-    regs = ip_regexs_str.split(',')
+    regs = ip_regexs_str.split(",")
     rst = []
     for r in regs:
         # do not choose ip if it matches this regex
-        if r.startswith('-'):
+        if r.startswith("-"):
             r = (r[1:], False)
         else:
             r = (r, True)
 
-        if r[0] == '':
-            raise ValueError('invalid regular expression: ' + repr(r))
+        if r[0] == "":
+            raise ValueError("invalid regular expression: " + repr(r))
 
         if r[1]:
             r = r[0]
@@ -339,10 +335,8 @@ def choose_by_regex(ips, ip_regexs):
     rst = []
 
     for ip in ips:
-
         all_negative = True
         for ip_regex in ip_regexs:
-
             # choose matched:
             #     '127[.]'
             #     ('127[.]', True)
@@ -380,9 +374,9 @@ def ip_to_num(ip_str):
     :return: a 4-byte integer.
     """
     if not is_ip4(ip_str):
-        raise InvalidIP4('IP is invalid: {s}'.format(s=ip_str))
+        raise InvalidIP4("IP is invalid: {s}".format(s=ip_str))
 
-    return struct.unpack('>L', socket.inet_aton(ip_str))[0]
+    return struct.unpack(">L", socket.inet_aton(ip_str))[0]
 
 
 def num_to_ip(ip_num):
@@ -392,22 +386,21 @@ def num_to_ip(ip_num):
     :return: IP.
     """
     if isinstance(ip_num, bool) or not isinstance(ip_num, int):
-        raise InvalidIP4Number('The type of IP4 number should be int or long :{t}'.format(t=type(ip_num)))
-    if ip_num > 0xffffffff or ip_num < 0:
-        raise InvalidIP4Number('IP4 number should be between 0 and 0xffffffff :{s}'.format(s=ip_num))
+        raise InvalidIP4Number("The type of IP4 number should be int or long :{t}".format(t=type(ip_num)))
+    if ip_num > 0xFFFFFFFF or ip_num < 0:
+        raise InvalidIP4Number("IP4 number should be between 0 and 0xffffffff :{s}".format(s=ip_num))
 
-    return socket.inet_ntoa(struct.pack('>L', ip_num))
+    return socket.inet_ntoa(struct.pack(">L", ip_num))
 
 
 if __name__ == "__main__":
-
     args = sys.argv[1:]
 
-    if args[0] == 'ip':
+    if args[0] == "ip":
         print(yaml.dump(get_host_ip4(), default_flow_style=False))
 
-    elif args[0] == 'device':
+    elif args[0] == "device":
         print(yaml.dump(get_host_devices(), default_flow_style=False))
 
     else:
-        raise ValueError('invalid command line arguments', args)
+        raise ValueError("invalid command line arguments", args)
