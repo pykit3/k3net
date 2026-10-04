@@ -1,19 +1,16 @@
-#!/usr/bin/env python
-
 import k3net
 
 if __name__ == "__main__":
-
     # Check if an IP is valid IPv4
     print(k3net.is_ip4("192.168.0.1"))  # True
-    print(k3net.is_ip4("invalid"))      # False
+    print(k3net.is_ip4("invalid"))  # False
 
     # Check if IP is public or private (INN)
-    print(k3net.is_pub("1.2.3.4"))      # True
+    print(k3net.is_pub("1.2.3.4"))  # True
     print(k3net.is_inn("192.168.0.1"))  # True
 
     # Get IP class
-    print(k3net.ip_class("1.2.3.4"))      # PUB
+    print(k3net.ip_class("1.2.3.4"))  # PUB
     print(k3net.ip_class("192.168.0.1"))  # INN
 
     # Select IPs by class

@@ -27,15 +27,11 @@ class NetworkError(Exception):
     Super class of all network exceptions.
     """
 
-    pass
-
 
 class IPUnreachable(NetworkError):
     """
     Exception for an unreachable ip.
     """
-
-    pass
 
 
 class InvalidIP4(Exception):
@@ -43,15 +39,11 @@ class InvalidIP4(Exception):
     Exception for an invalidIP4 ip.
     """
 
-    pass
-
 
 class InvalidIP4Number(Exception):
     """
     Exception for an invalidIP4 number.
     """
-
-    pass
 
 
 def is_ip4(ip):
@@ -89,8 +81,7 @@ def ip_class(ip):
         if re.match(ptn, ip):
             return INN
 
-    else:
-        return PUB
+    return PUB
 
 
 def is_ip4_loopback(ip):
@@ -156,7 +147,7 @@ def choose_ips(ips, ip_type=None):
     elif ip_type == PUB:
         return choose_pub(ips)
     else:
-        raise ValueError("invalid ip_type: {ip_type}".format(ip_type=ip_type))
+        raise ValueError(f"invalid ip_type: {ip_type}")
 
 
 def choose_pub(ips):
@@ -198,9 +189,8 @@ def get_host_ip4(iface_prefix=None, exclude_prefix=None):
     if isinstance(iface_prefix, (str, bytes)):
         iface_prefix = [iface_prefix]
 
-    if exclude_prefix is not None:
-        if isinstance(exclude_prefix, (str, bytes)):
-            exclude_prefix = [exclude_prefix]
+    if isinstance(exclude_prefix, (str, bytes)):
+        exclude_prefix = [exclude_prefix]
 
     ips = []
 
@@ -346,7 +336,7 @@ def choose_by_regex(ips, ip_regexs):
             if type(ip_regex) in (type(()), type([])):
                 ip_regex, to_choose = ip_regex
             else:
-                ip_regex, to_choose = ip_regex, True
+                to_choose = True
 
             all_negative = all_negative and not to_choose
 
@@ -374,7 +364,7 @@ def ip_to_num(ip_str):
     :return: a 4-byte integer.
     """
     if not is_ip4(ip_str):
-        raise InvalidIP4("IP is invalid: {s}".format(s=ip_str))
+        raise InvalidIP4(f"IP is invalid: {ip_str}")
 
     return struct.unpack(">L", socket.inet_aton(ip_str))[0]
 
@@ -386,9 +376,9 @@ def num_to_ip(ip_num):
     :return: IP.
     """
     if isinstance(ip_num, bool) or not isinstance(ip_num, int):
-        raise InvalidIP4Number("The type of IP4 number should be int or long :{t}".format(t=type(ip_num)))
+        raise InvalidIP4Number(f"The type of IP4 number should be int or long :{type(ip_num)}")
     if ip_num > 0xFFFFFFFF or ip_num < 0:
-        raise InvalidIP4Number("IP4 number should be between 0 and 0xffffffff :{s}".format(s=ip_num))
+        raise InvalidIP4Number(f"IP4 number should be between 0 and 0xffffffff :{ip_num}")
 
     return socket.inet_ntoa(struct.pack(">L", ip_num))
 

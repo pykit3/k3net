@@ -1,8 +1,8 @@
 import unittest
 
+import k3ut
 
 import k3net
-import k3ut
 
 dd = k3ut.dd
 
@@ -15,7 +15,8 @@ class TestNet(unittest.TestCase):
         self.assertEqual("127.0.0.1", k3net.LOCALHOST)
 
     def test_exception(self):
-        [k3net.NetworkError, k3net.IPUnreachable]
+        is_network_error = issubclass(k3net.IPUnreachable, k3net.NetworkError)
+        self.assertTrue(is_network_error)
 
     def test_is_ip4_false(self):
         cases_not_ip4 = (
