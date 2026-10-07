@@ -30,6 +30,7 @@ class TestNet(unittest.TestCase):
             (),
             [],
             {},
+            b"1.1.1.1",
             "1.",
             "1.1",
             "1.1.",

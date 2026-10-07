@@ -52,7 +52,7 @@ def is_ip4(ip):
     :param ip: string or other type data.
     :return: `True` if `ip` is valid ipv4 address. Otherwise `False`.
     """
-    if not isinstance(ip, (str, bytes)):
+    if not isinstance(ip, str):
         return False
 
     ip = ip.split(".")
