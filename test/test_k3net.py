@@ -1,10 +1,26 @@
 import unittest
+from unittest import mock
 
 import k3ut
+import netifaces
 
 import k3net
 
 dd = k3ut.dd
+
+INET = netifaces.AF_INET
+LINK = netifaces.AF_LINK
+
+# Interfaces in the form that netifaces.ifaddresses() returns.
+FAKE_IFACES = {
+    "lo": {INET: [{"addr": "127.0.0.1"}], LINK: [{"addr": "00:00:00:00:00:00"}]},
+    "eth0": {INET: [{"addr": "10.0.0.1"}, {"addr": "10.0.0.2"}], LINK: [{"addr": "02:00:00:00:00:01"}]},
+    "eth1": {INET: [{"addr": "192.168.0.1"}], LINK: [{"addr": "02:00:00:00:00:02"}]},
+    "en0": {INET: [{"addr": "172.16.0.1"}], LINK: [{"addr": "02:00:00:00:00:03"}]},
+    # An interface without an IPv4 address or without a link-layer address is skipped.
+    "tun0": {INET: [{"addr": "10.8.0.1"}]},
+    "eth2": {LINK: [{"addr": "02:00:00:00:00:04"}]},
+}
 
 
 class TestNet(unittest.TestCase):
@@ -220,9 +236,46 @@ class TestNet(unittest.TestCase):
 
         self.assertEqual(ips, k3net.get_host_ip4(exclude_prefix=None), "exclude nothing")
 
+    def test_get_host_ip4_fake_ifaces(self):
+        all_ips = ["10.0.0.1", "10.0.0.2", "192.168.0.1", "172.16.0.1"]
+        cases = (
+            (None, None, all_ips),
+            ("eth", None, ["10.0.0.1", "10.0.0.2", "192.168.0.1"]),
+            (["eth1", "en"], None, ["192.168.0.1", "172.16.0.1"]),
+            (None, "eth", ["172.16.0.1"]),
+            (None, ["eth0", "en"], ["192.168.0.1"]),
+            ("eth", "eth1", ["10.0.0.1", "10.0.0.2"]),
+            (None, "", []),
+            (None, [], all_ips),
+        )
+
+        with (
+            mock.patch("netifaces.interfaces", return_value=list(FAKE_IFACES)),
+            mock.patch("netifaces.ifaddresses", side_effect=FAKE_IFACES.__getitem__),
+        ):
+            for iface_prefix, exclude_prefix, expected in cases:
+                dd("iface_prefix, exclude_prefix:", iface_prefix, exclude_prefix)
+                rst = k3net.get_host_ip4(iface_prefix=iface_prefix, exclude_prefix=exclude_prefix)
+                self.assertEqual(expected, rst)
+
     def test_get_host_devices(self):
-        # TODO can not test
-        k3net.get_host_devices(iface_prefix="")
+        # An interface with a loopback address is left out.
+        cases = (
+            ("", ["eth0", "eth1", "en0"]),
+            ("eth", ["eth0", "eth1"]),
+            ("en", ["en0"]),
+            ("wlan", []),
+        )
+
+        with (
+            mock.patch("netifaces.interfaces", return_value=list(FAKE_IFACES)),
+            mock.patch("netifaces.ifaddresses", side_effect=FAKE_IFACES.__getitem__),
+        ):
+            for iface_prefix, names in cases:
+                dd("iface_prefix:", iface_prefix)
+                expected = {name: {"INET": FAKE_IFACES[name][INET], "LINK": FAKE_IFACES[name][LINK]} for name in names}
+                rst = k3net.get_host_devices(iface_prefix=iface_prefix)
+                self.assertEqual(expected, rst)
 
     def test_parse_ip_regex_str(self):
         cases = (
