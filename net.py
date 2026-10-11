@@ -18,7 +18,7 @@ It is string "INN" that represents a internal ip.
 INN = "INN"
 
 LOCALHOST = "127.0.0.1"
-inner_ip_patterns = ["^172[.]1[6-9].*", "^172[.]2[0-9].*", "^172[.]3[0-1].*", "^10[.].*", "^192[.]168[.].*"]
+inner_ip_patterns = ["^172[.]1[6-9][.].*", "^172[.]2[0-9][.].*", "^172[.]3[0-1][.].*", "^10[.].*", "^192[.]168[.].*"]
 logger = logging.getLogger(__name__)
 
 

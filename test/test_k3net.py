@@ -111,6 +111,9 @@ class TestNet(unittest.TestCase):
             "173.0.0.0",
             "172.15.0.0",
             "172.32.0.0",
+            # The second octet must end before the dot: 172.160 is not 172.16.
+            "172.160.1.1",
+            "172.200.1.1",
             "9.0.0.0",
             "11.0.0.0",
             "192.167.0.0",
