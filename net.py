@@ -58,7 +58,8 @@ def is_ip4(ip):
     ip = ip.split(".")
 
     for s in ip:
-        if not s.isdigit():
+        # str.isdigit() also accepts digits such as "²" and "١", which are not ASCII.
+        if not (s.isascii() and s.isdigit()):
             return False
 
         i = int(s)
@@ -366,7 +367,9 @@ def ip_to_num(ip_str):
     if not is_ip4(ip_str):
         raise InvalidIP4(f"IP is invalid: {ip_str}")
 
-    return struct.unpack(">L", socket.inet_aton(ip_str))[0]
+    # socket.inet_aton() reads "010" as octal 8, but is_ip4() has checked each octet as decimal.
+    octets = bytes(int(s) for s in ip_str.split("."))
+    return struct.unpack(">L", octets)[0]
 
 
 def num_to_ip(ip_num):

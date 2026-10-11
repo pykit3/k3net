@@ -53,6 +53,10 @@ class TestNet(unittest.TestCase):
             "1.1.1.1.1",
             "1.1.1.1.1.",
             "1.1.1.1.1.1",
+            # Digits that are not ASCII.
+            "1.1.1.\u00b2",
+            "\u0661.1.1.1",
+            "\uff11.1.1.1",
         )
 
         for inp in cases_not_ip4:
@@ -282,6 +286,10 @@ class TestNet(unittest.TestCase):
 
         for out, ipn in cases_ip4_and_ip4_num:
             self.assertEqual(out, k3net.num_to_ip(ipn))
+
+        # An octet with a leading zero is decimal, as is_ip4() checks it.
+        self.assertEqual(0x0A000001, k3net.ip_to_num("010.0.0.1"))
+        self.assertEqual(0x0A0A0A0A, k3net.ip_to_num("010.010.010.010"))
 
         cases_not_ip4_and_not_ip4_num = (
             None,
