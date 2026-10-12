@@ -49,6 +49,9 @@ class InvalidIP4Number(Exception):
 def is_ip4(ip):
     """
     It checks if `ip` is a valid ipv4 string.
+    An octet with a leading zero, such as `010`, is not valid, because some
+    parsers read it as octal. The stdlib `ipaddress` rejects it too, since
+    CVE-2021-29921.
     :param ip: string or other type data.
     :return: `True` if `ip` is valid ipv4 address. Otherwise `False`.
     """
@@ -62,6 +65,9 @@ def is_ip4(ip):
         if not (s.isascii() and s.isdigit()):
             return False
 
+        if len(s) > 1 and s[0] == "0":
+            return False
+
         i = int(s)
         if i < 0 or i > 255:
             return False
@@ -72,9 +78,13 @@ def is_ip4(ip):
 def ip_class(ip):
     """
     Return the class of `ip`: `net.PUB` or `net.INN`.
+    It raises `InvalidIP4` if `is_ip4(ip)` is `False`.
     :param ip:
     :return: `net.PUB` or `net.INN`.
     """
+    if not is_ip4(ip):
+        raise InvalidIP4(f"IP is invalid: {ip}")
+
     if ip.startswith("127.0.0."):
         return INN
 
@@ -367,7 +377,6 @@ def ip_to_num(ip_str):
     if not is_ip4(ip_str):
         raise InvalidIP4(f"IP is invalid: {ip_str}")
 
-    # socket.inet_aton() reads "010" as octal 8, but is_ip4() has checked each octet as decimal.
     octets = bytes(int(s) for s in ip_str.split("."))
     return struct.unpack(">L", octets)[0]
 

@@ -73,6 +73,11 @@ class TestNet(unittest.TestCase):
             "1.1.1.\u00b2",
             "\u0661.1.1.1",
             "\uff11.1.1.1",
+            # A leading zero, which some parsers read as octal.
+            "010.0.0.1",
+            "1.01.1.1",
+            "1.1.00.1",
+            "1.1.1.0255",
         )
 
         for inp in cases_not_ip4:
@@ -102,6 +107,8 @@ class TestNet(unittest.TestCase):
             "126.0.0.1",
             "128.0.0.1",
             "255.255.255.255",
+            "127.0.0.01",
+            "0127.0.0.1",
         )
 
         for ip in cases_ip4:
@@ -186,6 +193,14 @@ class TestNet(unittest.TestCase):
             self.assertEqual([inp], k3net.choose_ips(["1.1.1.1", inp], k3net.INN))
             self.assertEqual([inp, "1.1.1.1"], k3net.choose_ips([inp, "1.1.1.1"]))
             self.assertEqual(["1.1.1.1", inp], k3net.choose_ips(["1.1.1.1", inp]))
+
+    def test_ip_class_invalid(self):
+        # Only a string that is_ip4() accepts has a class.
+        for inp in ("010.0.0.1", "0127.0.0.1", "1.2.3", "foo"):
+            self.assertRaises(k3net.InvalidIP4, k3net.ip_class, inp)
+            self.assertRaises(k3net.InvalidIP4, k3net.is_pub, inp)
+            self.assertRaises(k3net.InvalidIP4, k3net.is_inn, inp)
+            self.assertRaises(k3net.InvalidIP4, k3net.choose_pub, ["1.1.1.1", inp])
 
     def test_ips_prefer(self):
         cases = (
@@ -340,10 +355,6 @@ class TestNet(unittest.TestCase):
         for out, ipn in cases_ip4_and_ip4_num:
             self.assertEqual(out, k3net.num_to_ip(ipn))
 
-        # An octet with a leading zero is decimal, as is_ip4() checks it.
-        self.assertEqual(0x0A000001, k3net.ip_to_num("010.0.0.1"))
-        self.assertEqual(0x0A0A0A0A, k3net.ip_to_num("010.010.010.010"))
-
         cases_not_ip4_and_not_ip4_num = (
             None,
             True,
@@ -375,6 +386,8 @@ class TestNet(unittest.TestCase):
             "1.1.1.1.1",
             "1.1.1.1.1.",
             "1.1.1.1.1.1",
+            "010.0.0.1",
+            "010.010.010.010",
             -10,
             -100,
             -110000000000,
